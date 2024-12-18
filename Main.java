@@ -67,7 +67,7 @@ public class Main {
                     if (student != null) {
                         System.out.println("Student found: " + student);
                     } else {
-System.out.println("Student not found.");
+                        System.out.println("Student not found.");
                     }
                     break;
 
