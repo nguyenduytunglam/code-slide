@@ -1,136 +1,3 @@
-import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        StudentManagement management = new StudentManagement();
-
-        System.out.print("Enter the number of students: ");
-        int numStudents = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
-
-        // Tạo ngẫu nhiên sinh viên
-        management.addRandomStudents(numStudents);
-
-        while (true) {
-            // Menu
-            System.out.println("\n---- Student Management ----");
-            System.out.println("1. Add a student");
-            System.out.println("2. Remove a student");
-            System.out.println("3. Update a student");
-            System.out.println("4. Search for a student");
-            System.out.println("5. Display all students");
-            System.out.println("6. Sort students by grade");
-            System.out.println("7. Exit");
-
-            System.out.print("Choose an option: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-
-            switch (choice) {
-                case 1:
-                    // Add a student
-                    System.out.print("Enter student ID: ");
-                    String id = scanner.nextLine();
-                    System.out.print("Enter student name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Enter student grade: ");
-                    double grade = scanner.nextDouble();
-                    scanner.nextLine(); // Consume newline
-                    Student newStudent = new Student(id, name, grade);
-                    management.addStudent(newStudent);
-                    break;
-
-                case 2:
-                    // Remove a student
-                    System.out.print("Enter student ID to remove: ");
-                    String removeId = scanner.nextLine();
-                    management.removeStudent(removeId);
-                    break;
-
-                case 3:
-                    // Update a student
-                    System.out.print("Enter student ID to update: ");
-                    String updateId = scanner.nextLine();
-                    System.out.print("Enter new student name: ");
-                    String newName = scanner.nextLine();
-                    System.out.print("Enter new student grade: ");
-                    double newGrade = scanner.nextDouble();
-                    management.updateStudent(updateId, newName, newGrade);
-                    break;
-
-                case 4:
-                    // Search for a student
-                    System.out.print("Enter student ID to search: ");
-                    String searchId = scanner.nextLine();
-                    Student student = management.searchStudent(searchId);
-                    if (student != null) {
-                        System.out.println("Student found: " + student);
-                    } else {
-System.out.println("Student not found.");
-                    }
-                    break;
-
-                case 5:
-                    // Display all students
-                    management.displayAllStudents();
-                    break;
-
-                case 6:
-                    // Sort students by grade
-                    management.sortStudentsByGrade();
-                    System.out.println("Students sorted by grade.");
-                    break;
-
-                case 7:
-                    System.out.println("Exiting...");
-                    return;
-
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
-    }
-}
-public class Student {
-    private String id;  // ID sinh viên (String)
-    private String name;  // Tên sinh viên
-    private double grade;  // Điểm sinh viên
-    public Student(String id, String name, double grade) {
-        this.id = id;
-        this.name = name;
-        this.grade = grade;
-    }
-    public String getId() {
-        return id;
-    }
-    public String getName() {
-        return name;
-    }
-    public double getGrade() {
-        return grade;
-    }
-    // Phương thức tính thứ hạng dựa trên điểm (theo bảng mới)
-    public String getRanking() {
-        if (grade >= 9.0) {
-            return "Excellent";
-        } else if (grade >= 7.5) {
-            return "Very Good";
-        } else if (grade >= 6.5) {
-            return "Good";
-        } else if (grade >= 5.0) {
-            return "Medium";
-        } else {
-            return "Fail";
-        }
-    }
-    @Override
-    public String toString() {
-        // Sử dụng String.format để đảm bảo điểm được hiển thị với 2 chữ số thập phân
-        return "ID: " + id + ", Name: " + name + ", Grade: " + String.format("%.2f", grade) + ", Rank: " + getRanking();
-    }
-
-}
 import java.util.Arrays;
 import java.util.Random;
 
@@ -221,3 +88,98 @@ public class StudentManagement {
         } else {
             System.out.println("Student with ID " + id + " not found.");
         }
+    }
+
+    // Tìm kiếm sinh viên theo ID
+    public Student searchStudent(String id) {
+        for (Student student : students.toArray()) {
+            if (student.getId().equals(id)) {
+                return student;
+            }
+        }
+        return null;  // Nếu không tìm thấy sinh viên
+    }
+
+    // Hiển thị tất cả sinh viên
+    public void displayAllStudents() {
+        if (students.isEmpty()) {
+            System.out.println("No students available.");
+            return;
+        }
+
+        for (Student student : students.toArray()) {
+            System.out.println(student);
+        }
+    }
+
+    // Sắp xếp sinh viên theo điểm giảm dần
+    public void sortStudentsByGrade() {
+        Student[] studentArray = students.toArray();
+
+        // Đo thời gian cho Bubble Sort
+        Student[] bubbleSortedArray = studentArray.clone();
+        long bubbleStartTime = System.nanoTime();
+        bubbleSort(bubbleSortedArray);
+        long bubbleEndTime = System.nanoTime();
+        long bubbleDuration = bubbleEndTime - bubbleStartTime;
+
+        // Đo thời gian cho Quick Sort
+        Student[] quickSortedArray = studentArray.clone();
+        long quickStartTime = System.nanoTime();
+        quickSort(quickSortedArray, 0, quickSortedArray.length - 1);
+        long quickEndTime = System.nanoTime();
+        long quickDuration = quickEndTime - quickStartTime;
+
+        // Cập nhật lại stack sau khi Quick Sort
+        students = new StudentStack();
+        for (Student student : quickSortedArray) {
+            students.push(student);
+        }
+
+        // Hiển thị thời gian chạy
+        System.out.println("Bubble Sort runtime: " + bubbleDuration + " ns");
+        System.out.println("Quick Sort runtime: " + quickDuration + " ns");
+    }
+
+    // Triển khai thuật toán Bubble Sort
+    private void bubbleSort(Student[] array) {
+        int n = array.length;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (array[j].getGrade() < array[j + 1].getGrade()) {
+                    // Hoán đổi nếu phần tử không đúng thứ tự
+                    Student temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    // Triển khai thuật toán Quick Sort
+    private void quickSort(Student[] array, int low, int high) {
+        if (low < high) {
+            int pivotIndex = partition(array, low, high);
+            quickSort(array, low, pivotIndex - 1);
+            quickSort(array, pivotIndex + 1, high);
+        }
+    }
+
+    private int partition(Student[] array, int low, int high) {
+        Student pivot = array[high];
+        int i = low - 1;
+        for (int j = low; j < high; j++) {
+            if (array[j].getGrade() >= pivot.getGrade()) {
+                i++;
+                Student temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+        Student temp = array[i + 1];
+        array[i + 1] = array[high];
+        array[high] = temp;
+        return i + 1;
+    }
+
+}
